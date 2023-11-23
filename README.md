@@ -33,7 +33,7 @@ CREATE DATABASE <database_name>
 - https://grafana.com/grafana/dashboards/2587-k6-load-testing-results/
 - Id: 2587
 
-![Grafana](./media/Grafana.png)
+![Grafana](./media/grafana.png)
 
 ### K6
 
