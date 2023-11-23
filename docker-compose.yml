@@ -1,0 +1,76 @@
+version: '3.9'
+
+
+networks:
+  demo:
+    driver: bridge
+
+services:
+
+  postgres:
+    image: postgres:16.1
+    container_name: postgres
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: a123456789
+      POSTGRES_DB: demo
+    volumes:
+      - ./src/Postgres/initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
+    networks:
+      - demo
+
+
+  pgadmin:
+    image: dpage/pgadmin4:8.0
+    container_name: pgadmin
+    restart: always
+    ports:
+      - 5050:80
+    environment:
+      PGADMIN_DEFAULT_PASSWORD: a123456789
+      PGADMIN_DEFAULT_EMAIL: test@test.com
+    volumes:
+      - ./src/Postgres/servers.json:/pgadmin4/servers.json
+    depends_on:
+      - postgres
+    networks:
+      - demo
+
+
+  influxdb:
+    image: influxdb:1.8.10
+    container_name: influxdb
+    restart: always
+    ports:
+      - 8086:8086
+    environment:
+      INFLUXDB_DB: k6
+#    volumes:
+#      - ./out/influxdb:/var/lib/influxdb
+    networks:
+      - demo
+
+
+  grafana:
+    image: grafana/grafana:10.2.2
+    container_name: grafana
+    environment:
+#      GF_SECURITY_ADMIN_USER: admin
+#      GF_SECURITY_ADMIN_PASSWORD: a123456789
+      TZ: Europe/Lisbon
+      GF_AUTH_ANONYMOUS_ENABLED: true # Allow anonymous access
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin # Set the role for anonymous users to Admin
+      GF_AUTH_BASIC_ENABLED: false # Disable basic auth
+    ports:
+      - 3000:3000
+    volumes:
+      - ./src/Grafana/data-source.yml:/etc/grafana/provisioning/datasources/data-source.yml # Data source configurations
+      - ./src/Grafana/dashboards:/etc/grafana/provisioning/dashboards # Folder containing dashboards
+      - ./src/Grafana/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml # Dashboard configurations
+#      - ./out/grafana:/var/lib/grafana
+    networks:
+      - demo
+    depends_on:
+      - influxdb
