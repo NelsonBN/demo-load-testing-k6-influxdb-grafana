@@ -6,6 +6,6 @@ datasources:
     access: proxy
     url: http://influxdb:8086
     database: k6
-#    user: usuario
-#    password: senha
+#    user: user
+#    password: password
     isDefault: true
